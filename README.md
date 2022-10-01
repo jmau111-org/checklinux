@@ -17,7 +17,7 @@ bash checklinux
 
 ## Opt out
 
-You can either select "1" to proceed or "2" to skip a specific analysis.
+You can either select "1" to proceed or "2" to skip a specific step.
 
 ## Warnings
 

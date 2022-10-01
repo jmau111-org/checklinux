@@ -1,0 +1,83 @@
+#!/bin/bash
+# credits: jmau111
+
+if [ $UID -ne 0 ]
+then
+	echo -e "\e[1;31m Ride as root, please...\033[0m"
+	exit 1
+fi
+
+CURRENT_TIME=$(date +"%Y-%m-%d-%H-%M-%S")
+CHECK_LINUX_DIR="/var/log/checklinux"
+LINPEAS_EXEC="/root/linpeas.sh"
+LINPEAS_LOGS="$CHECK_LINUX_DIR/linpeas-$CURRENT_TIME.txt"
+
+function printsuccess() {
+	echo -e "\033[92mdone, $1\033[0m"
+}
+
+function run_ll() {
+	# install dependencies if command not found
+	if [ `which git 2>/dev/null` ]; then
+		git --version
+	else
+		sudo apt install -y git
+	fi
+	if [ `which lynis 2>/dev/null` ]; then
+		echo "lynis version $(lynis -V)"
+	else
+		sudo apt install -y lynis
+	fi
+
+	# run lynis
+	echo -e "\033[96mrunning lynis in quiet mode...\033[0m"
+	lynis audit system --quiet
+
+	# linpeas setup & run
+	if [ -f "$LINPEAS_EXEC" ]; then
+		echo -e "\033[96mlinpeas script found, skipping download...\033[0m"
+	else
+		wget https://github.com/carlospolop/PEASS-ng/releases/latest/download/linpeas.sh
+		chmod +x linpeas.sh
+		sudo mv linpeas.sh "$LINPEAS_EXEC"
+	fi
+
+	echo -e "\033[96msaving linpeas results in log...\033[0m"
+	sudo sh "$LINPEAS_EXEC" -e > "$LINPEAS_LOGS"
+
+	# Give cmd to read logs
+	printsuccess "you can type: less /var/log/lynis.log"
+	printsuccess "you can type: less -r $LINPEAS_LOGS"
+}
+
+function clean_it() {
+	sudo rm -r "$CHECK_LINUX_DIR"
+	sudo rm "/var/log/lynis.log"
+	sudo rm "/var/log/lynis-report.dat"
+	sudo rm "$LINPEAS_EXEC"
+	printsuccess "files erased"
+}
+
+function deinstall_it() {
+	sudo apt purge lynis
+	printsuccess "package removed"
+}
+
+function checkThat() {
+	echo -e "\033[96m$1\033[0m"
+	select yn in "Yes" "No"; do
+	case $yn in
+		Yes) 
+			$2
+			break;;
+		No) 
+			echo "skipping..."
+			break && continue;;
+	esac
+	done
+}
+
+mkdir -p $CHECK_LINUX_DIR
+checkThat "do you want to run automated analysis (lynis, linpeas)?" run_ll
+checkThat "do you want to clean all generated logs and downloaded scripts?" clean_it
+checkThat "do you want to deinstall dependencies (lynis)?" deinstall_it

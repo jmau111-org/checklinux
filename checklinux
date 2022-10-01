@@ -79,5 +79,7 @@ function checkThat() {
 
 mkdir -p $CHECK_LINUX_DIR
 checkThat "do you want to run automated analysis (lynis, linpeas)?" run_ll
-checkThat "do you want to clean all generated logs and downloaded scripts?" clean_it
-checkThat "do you want to deinstall dependencies (lynis)?" deinstall_it
+checkThat "do you want to clean all generated logs and downloaded scripts? (make sure you have read the logs before! Otherwise, type 2.)" clean_it
+checkThat "do you want to deinstall dependencies?" deinstall_it
+
+printsuccess "thanks for using checklinux <3"

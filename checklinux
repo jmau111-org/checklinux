@@ -12,7 +12,7 @@ CHECK_LINUX_DIR="/var/log/checklinux"
 LINPEAS_EXEC="/root/linpeas.sh"
 LINPEAS_LOGS="$CHECK_LINUX_DIR/linpeas-$CURRENT_TIME.txt"
 
-function printsuccess() {
+function print_success() {
 	echo -e "\033[92mdone, $1\033[0m"
 }
 
@@ -46,8 +46,8 @@ function run_ll() {
 	sudo sh "$LINPEAS_EXEC" -e > "$LINPEAS_LOGS"
 
 	# Give cmd to read logs
-	printsuccess "you can type: less /var/log/lynis.log"
-	printsuccess "you can type: less -r $LINPEAS_LOGS"
+	print_success "you can type: less /var/log/lynis.log"
+	print_success "you can type: less -r $LINPEAS_LOGS"
 }
 
 function clean_it() {
@@ -55,15 +55,15 @@ function clean_it() {
 	sudo rm "/var/log/lynis.log"
 	sudo rm "/var/log/lynis-report.dat"
 	sudo rm "$LINPEAS_EXEC"
-	printsuccess "files erased"
+	print_success "files erased"
 }
 
 function deinstall_it() {
 	sudo apt purge -y lynis
-	printsuccess "package removed"
+	print_success "package removed"
 }
 
-function checkThat() {
+function check_that() {
 	echo -e "\033[96m$1\033[0m"
 	select yn in "Yes" "No"; do
 	case $yn in
@@ -78,8 +78,8 @@ function checkThat() {
 }
 
 mkdir -p $CHECK_LINUX_DIR
-checkThat "do you want to run automated analysis (lynis, linpeas)?" run_ll
-checkThat "do you want to clean all generated logs and downloaded scripts? (make sure you have read the logs before! Otherwise, type 2.)" clean_it
-checkThat "do you want to deinstall dependencies?" deinstall_it
+check_that "do you want to run automated analysis (lynis, linpeas)?" run_ll
+check_that "do you want to clean all generated logs and downloaded scripts? (make sure you have read the logs before! Otherwise, type 2.)" clean_it
+check_that "do you want to deinstall dependencies?" deinstall_it
 
-printsuccess "thanks for using checklinux <3"
+print_success "thanks for using checklinux <3"
